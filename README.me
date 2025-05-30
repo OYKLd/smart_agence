@@ -1,0 +1,38 @@
+# Smart Agence - Application de Gestion de Clients
+
+Smart Agence est une application web conçue pour les agences souhaitant gérer efficacement leurs agents, tickets clients et activités de traitement. Elle combine une API REST avec FastAPI, une interface utilisateur avec Streamlit, et une base de données SQLite.
+
+## 🚀 Fonctionnalités
+
+- Gestion des agents : création, modification, suppression
+- Gestion des tickets : création, mise à jour, suivi par statut
+- Historique des événements liés aux tickets
+- Tableau de bord statistique avec graphiques dynamiques
+
+## 🛠️ Technologies utilisées
+
+- **Python 3.12+**
+- **FastAPI** : Backend REST
+- **SQLite** : Base de données relationnelle
+- **SQLAlchemy** : ORM pour la gestion de la base
+- **Streamlit** : Interface utilisateur
+- **Plotly** : Visualisation de données
+
+## 📁 Structure du projet
+smart_agence/
+├── api/
+│ ├── src/
+│ │ ├── models.py
+│ │ ├── schemas.py
+│ │ ├── crud.py
+│ │ └── database.py
+│ ├── config.py
+│ └── main.py
+├── streamlit_app/
+│ ├── pages/
+│ │ ├── Dashboard.py
+│ │ └── Admin.py
+│ └── Home.py
+├── requirements.txt
+├── README.md
+└── tests/
