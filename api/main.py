@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from .src import models, schemas, crud
 from .src.database import SessionLocal, engine
@@ -49,7 +49,7 @@ def delete_agent(agent_id: int, db: Session = Depends(get_db)):
     return db_agent
 
 # Routes Tickets
-@app.post("/tickets/", response_model=schemas.Ticket)
+@app.post("/tickets/", response_model=schemas.Ticket, status_code=status.HTTP_201_CREATED)
 def create_ticket(ticket: schemas.TicketCreate, db: Session = Depends(get_db)):
     return crud.create_ticket(db=db, ticket=ticket)
 

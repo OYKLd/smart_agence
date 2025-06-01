@@ -133,20 +133,22 @@ def show_agent_management():
     if sort_by in filtered_df.columns:
         filtered_df = filtered_df.sort_values(sort_by)
     for idx, agent in filtered_df.iterrows():
+        # Utilise agent_id si dispo, sinon l'index pour la clé du formulaire
+        form_key = f"edit_agent_{agent.get('agent_id', f'noid_{idx}')}"
         with st.expander(f"👤 {agent.get('nom', '')} {agent.get('prenoms', '')} - {agent.get('categorie', '')}"):
             col1, col2 = st.columns([2, 1])
             with col1:
-                with st.form(f"edit_agent_{agent.get('agent_id')}"):
+                with st.form(form_key):
                     st.write("**Informations de l'agent:**")
-                    new_nom = st.text_input("Nom", value=agent.get('nom', ''), key=f"nom_{agent.get('agent_id')}")
-                    new_prenoms = st.text_input("Prénoms", value=agent.get('prenoms', ''), key=f"prenoms_{agent.get('agent_id')}")
-                    new_email = st.text_input("Email", value=agent.get('email', ''), key=f"email_{agent.get('agent_id')}")
-                    new_telephone = st.text_input("Téléphone", value=agent.get('telephone', ''), key=f"tel_{agent.get('agent_id')}")
+                    new_nom = st.text_input("Nom", value=agent.get('nom', ''), key=f"nom_{form_key}")
+                    new_prenoms = st.text_input("Prénoms", value=agent.get('prenoms', ''), key=f"prenoms_{form_key}")
+                    new_email = st.text_input("Email", value=agent.get('email', ''), key=f"email_{form_key}")
+                    new_telephone = st.text_input("Téléphone", value=agent.get('telephone', ''), key=f"tel_{form_key}")
                     new_categorie = st.selectbox(
                         "Catégorie",
                         ["transaction", "conseil"],
                         index=0 if agent.get('categorie') == 'transaction' else 1,
-                        key=f"cat_{agent.get('agent_id')}"
+                        key=f"cat_{form_key}"
                     )
                     col_a, col_b = st.columns(2)
                     with col_a:
@@ -159,18 +161,25 @@ def show_agent_management():
                                 "categorie": new_categorie,
                                 "annee_naissance": agent.get('annee_naissance')
                             }
-                            if update_agent(agent.get('agent_id'), updated_data):
-                                st.success("✅ Agent modifié avec succès!")
-                                st.rerun()
+                            # Ne tente la modif que si agent_id existe
+                            if agent.get('agent_id'):
+                                if update_agent(agent.get('agent_id'), updated_data):
+                                    st.success("✅ Agent modifié avec succès!")
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Erreur lors de la modification")
                             else:
-                                st.error("❌ Erreur lors de la modification")
+                                st.warning("Impossible de modifier cet agent (pas d'identifiant unique).")
                     with col_b:
                         if st.form_submit_button("🗑️ Supprimer", type="secondary"):
-                            if delete_agent(agent.get('agent_id')):
-                                st.success("✅ Agent supprimé avec succès!")
-                                st.rerun()
+                            if agent.get('agent_id'):
+                                if delete_agent(agent.get('agent_id')):
+                                    st.success("✅ Agent supprimé avec succès!")
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Erreur lors de la suppression")
                             else:
-                                st.error("❌ Erreur lors de la suppression")
+                                st.warning("Impossible de supprimer cet agent (pas d'identifiant unique).")
             with col2:
                 st.write("**Statistiques:**")
                 tickets = get_api_data("tickets")
@@ -180,7 +189,7 @@ def show_agent_management():
                     done_tickets = len([t for t in agent_tickets if t.get('statut') == 'done'])
                     st.metric("Tickets terminés", done_tickets)
                     st.metric("Taux de réussite", f"{(done_tickets/len(agent_tickets)*100):.1f}%")
-                st.write(f"**ID:** {agent.get('agent_id')}")
+                st.write(f"**ID:** {agent.get('agent_id', 'Aucun')}")
                 st.write(f"**Année naissance:** {agent.get('annee_naissance')}")
                 st.write(f"**Date enregistrement:** {agent.get('date_enregistrement', 'N/A')[:10]}")
 

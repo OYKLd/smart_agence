@@ -48,15 +48,21 @@ def get_tickets():
 def create_agent(agent_data):
     try:
         response = requests.post(f"{API_BASE_URL}/agents/", json=agent_data)
-        return response.status_code == 201
-    except requests.exceptions.RequestException:
+        if response.status_code not in (200, 201):
+            st.error(f"Erreur API: {response.status_code} - {response.text}")
+        return response.status_code in (200, 201)
+    except requests.exceptions.RequestException as e:
+        st.error(f"Erreur de connexion: {e}")
         return False
 
 def create_ticket(ticket_data):
     try:
         response = requests.post(f"{API_BASE_URL}/tickets/", json=ticket_data)
+        if response.status_code != 201:
+            st.error(f"Erreur API: {response.status_code} - {response.text}")
         return response.status_code == 201
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as e:
+        st.error(f"Erreur de connexion: {e}")
         return False
 
 def update_ticket_status(ticket_id, status_data):
@@ -328,7 +334,10 @@ def show_tickets_management():
         st.subheader("Créer un nouveau ticket")
         
         agents = get_agents()
-        
+        for a in agents:
+            if 'agent_id' not in a and 'id' in a:
+                a['agent_id'] = a['id']
+        agents = [a for a in agents if 'agent_id' in a]
         if not agents:
             st.warning("⚠️ Aucun agent disponible. Veuillez d'abord enregistrer des agents.")
             return
@@ -397,31 +406,35 @@ def show_tickets_management():
             
             # Filtres
             col1, col2, col3 = st.columns(3)
-            
+
+            filter_status = 'Tous'
+            filter_service = 'Toutes'
+            filter_agent = 'Tous'
+
             with col1:
                 if 'statut' in df_tickets.columns:
                     statuts = ['Tous'] + list(df_tickets['statut'].unique())
                     filter_status = st.selectbox("Filtrer par statut", statuts)
-            
+
             with col2:
                 if 'categorie_service' in df_tickets.columns:
                     categories = ['Toutes'] + list(df_tickets['categorie_service'].unique())
                     filter_service = st.selectbox("Filtrer par service", categories)
-            
+
             with col3:
                 if 'agent_name' in df_tickets.columns:
                     agents_list = ['Tous'] + list(df_tickets['agent_name'].unique())
                     filter_agent = st.selectbox("Filtrer par agent", agents_list)
-            
+
             # Application des filtres
             filtered_df = df_tickets.copy()
-            
+
             if filter_status != 'Tous':
                 filtered_df = filtered_df[filtered_df['statut'] == filter_status]
-            
+
             if filter_service != 'Toutes':
                 filtered_df = filtered_df[filtered_df['categorie_service'] == filter_service]
-            
+
             if filter_agent != 'Tous':
                 filtered_df = filtered_df[filtered_df['agent_name'] == filter_agent]
             
