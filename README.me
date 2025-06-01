@@ -35,4 +35,34 @@ smart_agence/
 │ └── Home.py
 ├── requirements.txt
 ├── README.md
-└── tests/
+
+## 🔧 Installation
+
+1. **Cloner le dépôt**
+```bash
+git clone https://github.com/OYKLd/smart_agence
+cd smart_agence
+````
+
+2. **Créer un environnement virtuel**
+
+```bash
+python -m venv venv
+source venv/bin/activate  # Sous Windows : venv\Scripts\activate
+```
+
+3. **Installer les dépendances**
+
+```bash
+pip install -r requirements.txt
+```
+
+4. **Lancer l'application**
+
+```bash
+uvicorn api.main:app --reload
+```
+
+```bash
+streamlit run app.py
+```
